@@ -1,14 +1,75 @@
 <h1>Pong Game</h1>
 <div id='field'>
-  <div id='player_1'></div>
-  <div id='ball'></div>
-  <div id='player_2'></div>
   <div id='line'></div>
+  <div id='player-left'></div>
+  <div id='ball'></div>
+  <div id='player-right'></div>
 </div>
 <div id='score'>0:0</div>
 
-<!-- <audio src="pong.wav" id='pong_sound'></audio>
-<audio src="score.wav" id='score_sound'></audio> -->
+<pre>
+# DOCS
+
+constructor:
+  new PongGame(ball, field, playerLeft, playerRight)
+    ball (HTMLElement, required) a tag representing a ball
+    field (HTMLElement) a tag representing playing field
+    playerLeft (HTMLElement) a tag representing left player
+    playerRight (HTMLElement) a tag representing right player
+
+
+game methods:
+  PongGame.addEventListener(event_name, callback)
+    event_name (String) - one of the events names
+    callbalck (Function) - callback executed when event happen
+
+    adds an event listener for a given event (see: events)
+
+
+player methods:
+  player.moveUp(ydist)
+    dist (Number) - distance in pixels the player will be moved up
+
+    moves player up making sure the pad is contained inside the field,
+    this method is added to both playerLeft and playerRight on game start
+
+  player.moveDown(ydist)
+    dist (Number) - distance in pixels the player will be moved down
+
+    moves player down making sure the pad is contained inside the field,
+    this method is added to both playerLeft and playerRight on game start
+
+
+ball methods:
+  ball.setDirection(xdir)
+    xdir (Number) - -1 or 1 changes direction of the ball in x axis
+    this method is added to the ball on game start
+
+  ball.resetPosition()
+    puts the ball in the middle of the field
+    this method is added to the ball on game start
+
+  ball.setSpeed(val)
+    val (Number) - spped in pixels per frame, defaults to 4
+
+    changes speed of the ball
+    this method is added to the ball on game start
+
+
+events:
+  keydown
+    triggered when user presses one of the following keys:
+      'up', 'down', 'left', 'right', 'w', 's', 'a', 'd'
+    PongGame does not support any other buttons
+    passes *key* as the only argument
+  collision
+    triggered when ball touches one of the players
+    passes *player* as the only argument that equals to either playerLeft or playerRight
+  bounce
+    triggered when ball touches any of the edges of the field
+    passes *edge* as the only argument and it equals to one of the following values:
+      'left', 'right', 'top', 'bottom'
+</pre>
 
 <style>
 #score,
@@ -17,20 +78,20 @@ h1 {
   font-size: 50px;
 }
 #field {
-  width: 1000px;
-  height: 600px;
+  width: 800px;
+  height: 500px;
   background: black;
   margin: 20px auto;
   position: relative;
 }
-#player_1 {
-  left: 10px;
+#player-left {
+  left: 5px;
 }
-#player_2 {
-  left: 970px;
+#player-right {
+  right: 5px;
 }
-#player_1,
-#player_2 {
+#player-left,
+#player-right {
   position: absolute;
   top: 100px;
   width: 20px;
@@ -47,7 +108,7 @@ h1 {
 }
 #line {
   width: 4px;
-  height: 600px;
+  height: 500px;
   background: gray;
   position: absolute;
   left: 50%;
@@ -55,47 +116,36 @@ h1 {
 }
 </style>
 
-<script src='blob.js'> </script>
+<script src='pong.js'> </script>
 <script>
-  var game = new PongGame();
+  var playerLeftScore = 0;
+  var playerRightScore = 0;
 
-  // game knows nothing about the score
-  var left_score = 0;
-  var right_score = 0;
-  var scoreTag = document.querySelector('#score');
+  var score = document.querySelector('#score');
+  var ball = document.querySelector('#ball');
+  var field = document.querySelector('#field');
+  var playerLeft = document.querySelector('#player-left');
+  var playerRight = document.querySelector('#player-right');
 
-  // game config
-  game.ballTag = document.querySelector('#ball');
-  game.fieldTag = document.querySelector('#field');
-  game.padLeftTag = document.querySelector('#player_1');
-  game.padRightTag = document.querySelector('#player_2');
+  var game = new PongGame(ball, field, playerLeft, playerRight);
 
-  var ballTag = document.querySelector('#ball');
-  var player_1 = document.querySelector('#player_1');
-  var player_2 = document.querySelector('#player_2');
-
-  // game events
-  game.addEventListener('tick', function(data){
-    ballTag.style.left = data.ball.x;
-    ballTag.style.top = data.ball.y;
-
-    player_1.style.left = data.padLeft.x;
-    player_1.style.top = data.padLeft.y;
-
-    player_2.style.left = data.padRight.x;
-    player_2.style.top = data.padRight.y;
+  game.addEventListener('keydown', function(key){
+    if(key === 'w') playerLeft.moveUp(5);
+    if(key === 's') playerLeft.moveDown(5);
+    if(key === 'up') playerRight.moveUp(5);
+    if(key === 'down') playerRight.moveDown(5);
   });
 
-  game.addEventListener('bounce', function(side){
-    if(side === 'left'){
-      right_score++;
-      scoreTag.innerHTML = left_score + ':' + right_score;
-    }
-    if(side === 'right'){
-      left_score++;
-      scoreTag.innerHTML = left_score + ':' + right_score;
-    }
-  })
+  game.addEventListener('collision', function(player){
+    if(player === playerLeft) ball.setDirection(1);
+    if(player === playerRight) ball.setDirection(-1);
+  });
 
-  game.start()
+  game.addEventListener('bounce', function(edge){
+    if(edge === 'right') playerLeftScore++;
+    if(edge === 'left') playerRightScore++;
+
+    score.innerHTML = playerLeftScore + ':' + playerRightScore;
+  });
+
 </script>
