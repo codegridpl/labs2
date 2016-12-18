@@ -70,48 +70,32 @@ h1 {
   game.padLeftTag = document.querySelector('#player_1');
   game.padRightTag = document.querySelector('#player_2');
 
-  game.useCustomBouncing = true;
-  game.useCustomBallPostionUpdate = true;
+  var ballTag = document.querySelector('#ball');
+  var player_1 = document.querySelector('#player_1');
+  var player_2 = document.querySelector('#player_2');
 
   // game events
-  game.addEventListener('tick', function(frame){
-    // this function is only needed when useCustomBallPostionUpdate
-    game.ball.x += game.ball.dir_x * 5;
-    game.ball.y += game.ball.dir_y * 5;
+  game.addEventListener('tick', function(data){
+    ballTag.style.left = data.ball.x;
+    ballTag.style.top = data.ball.y;
+
+    player_1.style.left = data.padLeft.x;
+    player_1.style.top = data.padLeft.y;
+
+    player_2.style.left = data.padRight.x;
+    player_2.style.top = data.padRight.y;
   });
 
-  game.addEventListener('keydown', function(key){
-    if(key === 'w'){ game.padLeft.move(-5); }
-    if(key === 's'){ game.padLeft.move(5); }
-    if(key === 'up'){ game.padRight.move(-5); }
-    if(key === 'down'){ game.padRight.move(5); }
-  });
-
-  game.addEventListener('collision', function(ball, pad){
-    if(pad.side === 'left'){
-      ball.setDirection(1)
-    } else {
-      ball.setDirection(-1)
-    }
-  });
-
-  game.addEventListener('bounce', function(edge){
-    if(edge === 'top'){ game.ball.setDirection(null, 1) } // those 2 lines needed only if useCustomBouncing
-    if(edge === 'bottom'){ game.ball.setDirection(null, -1) }
-
-    if(edge === 'right'){
-      left_score++;
-      scoreTag.innerHTML = left_score + ':' + right_score;
-      game.ball.resetPosition()
-      game.ball.setDirection(-1)
-    }
-    if(edge === 'left'){
+  game.addEventListener('bounce', function(side){
+    if(side === 'left'){
       right_score++;
       scoreTag.innerHTML = left_score + ':' + right_score;
-      game.ball.resetPosition()
-      game.ball.setDirection(1)
     }
-  });
+    if(side === 'right'){
+      left_score++;
+      scoreTag.innerHTML = left_score + ':' + right_score;
+    }
+  })
 
   game.start()
 </script>

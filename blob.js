@@ -53,11 +53,11 @@ var PongGame = (function(){
   };
 
   Ball.prototype.tick = function(){
-    if(!this.useCustomBallPostionUpdate){
+    // if(!this.useCustomBallPostionUpdate){
       this.x += this.dir_x * this.speed;
       this.y += this.dir_y * this.speed;
-    }
-    this.applyPosition();
+    // }
+    // this.applyPosition(); // let's make people uply the position
   };
 
   Ball.prototype.resetPosition = function(){
@@ -196,7 +196,20 @@ var PongGame = (function(){
 
   function _tick(){
     this.frame++;
-    this.trigger('tick', this.frame);
+    this.trigger('tick', {
+      ball: {
+        x: this.ball.x,
+        y: this.ball.y
+      },
+      padLeft: {
+        x: this.padLeft.x,
+        y: this.padLeft.y
+      },
+      padRight: {
+        x: this.padRight.x,
+        y: this.padRight.y
+      }
+    });
 
     if(!this._paused){
       if(this.useCustomBouncing){
@@ -212,17 +225,24 @@ var PongGame = (function(){
       this.field.containPad(this.padRight);
 
       // input
-      if(isDown('w')){ this.trigger('keydown', 'w') }
-      if(isDown('s')){ this.trigger('keydown', 's') }
-      if(isDown('up')){ this.trigger('keydown', 'up') }
-      if(isDown('down')){ this.trigger('keydown', 'down') }
+      if(isDown('w')){ this.padLeft.move(-5); }
+      if(isDown('s')){ this.padLeft.move(5); }
+      if(isDown('up')){ this.padRight.move(-5); }
+      if(isDown('down')){ this.padRight.move(5); }
+
+      // if(isDown('w')){ this.trigger('keydown', 'w') }
+      // if(isDown('s')){ this.trigger('keydown', 's') }
+      // if(isDown('up')){ this.trigger('keydown', 'up') }
+      // if(isDown('down')){ this.trigger('keydown', 'down') }
 
       // collisions
       if(checkRectCollision(this.ball, this.padLeft)){
-        this.trigger('collision', this.ball, this.padLeft)
+        // this.trigger('collision', this.ball, this.padLeft)
+        this.ball.setDirection(1);
       }
       if(checkRectCollision(this.ball, this.padRight)){
-        this.trigger('collision', this.ball, this.padRight)
+        // this.trigger('collision', this.ball, this.padRight)
+        this.ball.setDirection(-1);
       }
     }
 
